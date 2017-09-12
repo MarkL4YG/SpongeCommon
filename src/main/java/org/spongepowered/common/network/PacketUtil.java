@@ -74,7 +74,7 @@ import java.util.Optional;
 
 public class PacketUtil {
 
-    private static final PhaseContext EMPTY_INVALID = PhaseContext.start().complete();
+    private static final PhaseContext<?> EMPTY_INVALID = PhaseContext.start().complete();
     private static long lastInventoryOpenPacketTimeStamp = 0;
     private static long lastTryBlockPacketTimeStamp = 0;
     private static boolean lastTryBlockPacketItemResult = true;
@@ -129,7 +129,7 @@ public class PacketUtil {
                 if (packetState == null) {
                     throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
                 }
-                PhaseContext context = EMPTY_INVALID;
+                PhaseContext<?> context = EMPTY_INVALID;
                 if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
                     context = PhaseContext.start()
                             .source(packetPlayer)

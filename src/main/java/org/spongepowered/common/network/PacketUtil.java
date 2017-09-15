@@ -73,13 +73,13 @@ import java.lang.ref.WeakReference;
 import java.util.Optional;
 
 public class PacketUtil {
+    private static final PhaseContext<?> EMPTY = new BasicPacketContext((PacketState) PacketPhase.General.INVALID).markEmpty();
 
-    private static final PhaseContext<?> EMPTY_INVALID = PhaseContext.start().complete();
     private static long lastInventoryOpenPacketTimeStamp = 0;
     private static long lastTryBlockPacketTimeStamp = 0;
     private static boolean lastTryBlockPacketItemResult = true;
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes", "unchecked", "unused"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
             EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
@@ -129,9 +129,9 @@ public class PacketUtil {
                 if (packetState == null) {
                     throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
                 }
-                PhaseContext<?> context = EMPTY_INVALID;
+                PhaseContext<?> context = EMPTY;
                 if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
-                    context = PhaseContext.start()
+                    context = packetState.createContext()
                             .source(packetPlayer)
                             .addExtra(InternalNamedCauses.Packet.PACKET_PLAYER, packetPlayer)
                             .addExtra(InternalNamedCauses.Packet.CAPTURED_PACKET, packetIn)
@@ -141,14 +141,13 @@ public class PacketUtil {
                     TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
                     context.owner((Player) packetPlayer);
                     context.notifier((Player) packetPlayer);
-                    context.complete();
+                    context.buildAndSwitch();
                 } else {
                     packetState = PacketPhase.General.INVALID;
                 }
-                causeTracker.switchToPhase(packetState, context, () -> {
+                try (PhaseContext<?> packetContext = context.buildAndSwitch()) {
                     packetIn.processPacket(netHandler);
-                    return null;
-                });
+                }
 
                 if (packetIn instanceof CPacketClientStatus) {
                     // update the reference of player

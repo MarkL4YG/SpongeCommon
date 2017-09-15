@@ -114,6 +114,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
@@ -209,16 +210,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             player.onUpdateEntity();
             return;
         }
-        final CauseTracker causeTracker = CauseTracker.getInstance();
-        final PhaseContext<?> complete = PhaseContext.start()
-            .source(player)
-            .addCaptures()
-            .addEntityDropCaptures()
-            .complete();
-        causeTracker.switchToPhase(TickPhase.Tick.PLAYER, complete, () -> {
+        try (PlayerTickContext context = TickPhase.Tick.PLAYER.createContext().source(player).buildAndSwitch()) {
             player.onUpdateEntity();
-            return null;
-        });
+        }
     }
 
     @Override

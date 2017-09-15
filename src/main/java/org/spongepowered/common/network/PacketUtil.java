@@ -61,10 +61,10 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.event.tracking.phase.packet.IPacketState;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.packet.*;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -125,7 +125,7 @@ public class PacketUtil {
             } else {
                 final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
                 final CauseTracker causeTracker = CauseTracker.getInstance();
-                IPacketState packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
+                IPhaseState<? extends PacketContext<?>> packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
                 if (packetState == null) {
                     throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
                 }

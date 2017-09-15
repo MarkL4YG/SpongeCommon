@@ -494,6 +494,8 @@ public abstract class MixinBlockRedstoneWire extends Block {
      * @param pos The position
      * @param side The side
      */
+    @SuppressWarnings("deprecation")
+    @Override
     @Overwrite
     public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
         if (!this.canProvidePower) {
